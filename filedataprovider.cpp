@@ -23,14 +23,14 @@
 #include <QJsonDocument>
 #include <QDebug>
 
-void FileDataProvider::ensureDataAvailable()
-{
-    QMetaObject::invokeMethod(this, "loadFile", Qt::QueuedConnection);
-}
-
 FileDataProvider::FileDataProvider(const QString &filePath)
     : m_filePath(filePath)
 {
+}
+
+void FileDataProvider::ensureDataAvailable()
+{
+    QMetaObject::invokeMethod(this, "loadFile", Qt::QueuedConnection);
 }
 
 void FileDataProvider::loadFile()
@@ -48,4 +48,3 @@ void FileDataProvider::loadFile()
     }
     emit dataAvailable(doc);
 }
-

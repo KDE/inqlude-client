@@ -1,6 +1,10 @@
 #include "inqludeclient.h"
 #include "dataprovider.h"
 #include <QCommandLineParser>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QDebug>
 
 #include <iostream>
 
@@ -32,7 +36,7 @@ int InqludeClient::run()
     if (command == QLatin1String("list")) {
         DataProvider::Ptr provider = DataProvider::createProvider();
         provider->ensureDataAvailable();
-        connect(provider.data(), &DataProvider::error, qApp, &QCoreApplication::quit);
+        connect(provider.data(), &DataProvider::error, this, &InqludeClient::error);
         connect(provider.data(), &DataProvider::dataAvailable, this, &InqludeClient::list);
         return qApp->exec();
     }
@@ -42,6 +46,18 @@ int InqludeClient::run()
 
 void InqludeClient::list(const QJsonDocument &doc)
 {
+    const QJsonArray libs = doc.array();
+    for (int i = 0; i < libs.count(); ++i) {
+        const QJsonObject details = libs.at(i).toObject();
+        const QString name = details.value("name").toString();
+        const QString summary = details.value("summary").toString();
+        std::cout << qPrintable(name) << '\t' << qPrintable(summary) << '\n';
+    }
+    qApp->quit();
+}
 
+void InqludeClient::error()
+{
+    qApp->exit(1);
 }
 

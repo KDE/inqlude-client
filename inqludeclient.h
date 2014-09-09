@@ -16,6 +16,7 @@ public:
 
 private Q_SLOTS:
     void list(const QJsonDocument &doc);
+    void error();
 
 };
 

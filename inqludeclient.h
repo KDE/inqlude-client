@@ -38,6 +38,10 @@ private Q_SLOTS:
     void list(const QJsonDocument &doc);
     void error();
 
+private:
+    typedef void (InqludeClient::* MemberFunctionPtr)(const QJsonDocument&);
+    void ensureDataAvailable(DataProvider::Ptr provider, MemberFunctionPtr slot);
+
 };
 
 #endif // InqludeClient_H

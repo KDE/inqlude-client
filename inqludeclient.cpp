@@ -36,6 +36,8 @@ InqludeClient::~InqludeClient()
 
 int InqludeClient::run()
 {
+    DataProvider::Ptr provider = DataProvider::createProvider();
+
     QCommandLineParser parser;
     parser.setApplicationDescription(tr("Command-line client for the inqlude.org repository of Qt libraries"));
     parser.addHelpOption();
@@ -53,11 +55,10 @@ int InqludeClient::run()
     const QStringList args = parser.positionalArguments();
     const QString command = args.isEmpty() ? QString() : args.first();
     if (command == QLatin1String("list")) {
-        DataProvider::Ptr provider = DataProvider::createProvider();
-        provider->ensureDataAvailable();
-        connect(provider.data(), &DataProvider::error, this, &InqludeClient::error);
-        connect(provider.data(), &DataProvider::dataAvailable, this, &InqludeClient::list);
+        ensureDataAvailable(provider, &InqludeClient::list);
         return qApp->exec();
+    } else if (command == QLatin1String("download")) {
+
     }
 
     parser.showHelp();
@@ -75,5 +76,12 @@ void InqludeClient::list(const QJsonDocument &doc)
 void InqludeClient::error()
 {
     qApp->exit(1);
+}
+
+void InqludeClient::ensureDataAvailable(DataProvider::Ptr provider,  MemberFunctionPtr slot)
+{
+    provider->ensureDataAvailable();
+    connect(provider.data(), &DataProvider::error, this, &InqludeClient::error);
+    connect(provider.data(), &DataProvider::dataAvailable, this, slot);
 }
 

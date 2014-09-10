@@ -12,6 +12,7 @@ set(sharedfiles_SRCS
    filedataprovider.cpp
    httpdataprovider.cpp
    listhandler.cpp
+   downloadhandler.cpp
    abstracthandler.cpp
 )
 add_library(libinqludeclient STATIC ${sharedfiles_SRCS})

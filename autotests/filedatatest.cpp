@@ -8,6 +8,7 @@
 
 #include "filedataprovider.h"
 #include "listhandler.h"
+#include "downloadhandler.h"
 
 class TestFileData : public QObject
 {
@@ -16,6 +17,7 @@ class TestFileData : public QObject
 private Q_SLOTS:
     void fileDataProviderShouldProvideData();
     void listCommandShouldOutputList();
+    void downloadCommandShouldStartDownload();
 
 private:
     void fetchData(QJsonDocument *doc);
@@ -55,6 +57,19 @@ void TestFileData::listCommandShouldOutputList()
        << "kbookmarks Web browser bookmark management"
        << "";
     QCOMPARE(output.split('\n'), expected);
+}
+
+void TestFileData::downloadCommandShouldStartDownload()
+{
+    QJsonDocument doc;
+    fetchData(&doc);
+
+    QString output;
+    QTextStream stream(&output);
+    DownloadHandler handler(stream, "kauth");
+    handler.download(doc);
+    const QString expected("Downloading http://download.kde.org/stable/frameworks/5.1.0/kauth-5.1.0.tar.xz...\n");
+    QCOMPARE(output, expected);
 }
 
 QTEST_MAIN(TestFileData)

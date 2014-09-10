@@ -20,6 +20,7 @@
 
 #include "inqludeclient.h"
 #include "dataprovider.h"
+#include "downloadhandler.h"
 #include "listhandler.h"
 
 #include <QCommandLineParser>
@@ -52,21 +53,29 @@ int InqludeClient::run()
 
     parser.process(*qApp);
 
+    QTextStream stream(stdout);
+
     const QStringList args = parser.positionalArguments();
     const QString command = args.isEmpty() ? QString() : args.first();
     if (command == QLatin1String("list")) {
-        QTextStream stream(stdout);
         ListHandler handler(stream);
         handler.setQuitOnCompletion(true);
         connect(provider.data(), &DataProvider::dataAvailable, &handler, &ListHandler::list);
         ensureDataAvailable(provider);
         return qApp->exec();
     } else if (command == QLatin1String("download")) {
-        //ensureDataAvailable(provider, &InqludeClient::download);
+        if (args.count() < 2) {
+            parser.showHelp(1);
+        }
+        const QString library = args.at(1);
+        DownloadHandler handler(stream, library);
+        handler.setQuitOnCompletion(true);
+        connect(provider.data(), &DataProvider::dataAvailable, &handler, &DownloadHandler::download);
+        ensureDataAvailable(provider);
         return qApp->exec();
-   }
+    }
 
-    parser.showHelp();
+    parser.showHelp(1);
     return 1;
 }
 

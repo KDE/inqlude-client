@@ -20,7 +20,7 @@
 
 #include "inqludeclient.h"
 #include "dataprovider.h"
-#include "commandhandler.h"
+#include "listhandler.h"
 
 #include <QCommandLineParser>
 #include <QDebug>
@@ -55,22 +55,19 @@ int InqludeClient::run()
     const QStringList args = parser.positionalArguments();
     const QString command = args.isEmpty() ? QString() : args.first();
     if (command == QLatin1String("list")) {
-        ensureDataAvailable(provider, &InqludeClient::list);
+        QTextStream stream(stdout);
+        ListHandler handler(stream);
+        handler.setQuitOnCompletion(true);
+        connect(provider.data(), &DataProvider::dataAvailable, &handler, &ListHandler::list);
+        ensureDataAvailable(provider);
         return qApp->exec();
     } else if (command == QLatin1String("download")) {
-
-    }
+        //ensureDataAvailable(provider, &InqludeClient::download);
+        return qApp->exec();
+   }
 
     parser.showHelp();
     return 1;
-}
-
-void InqludeClient::list(const QJsonDocument &doc)
-{
-    QTextStream stream(stdout);
-    CommandHandler handler(stream);
-    handler.list(doc);
-    qApp->quit();
 }
 
 void InqludeClient::error()
@@ -78,10 +75,8 @@ void InqludeClient::error()
     qApp->exit(1);
 }
 
-void InqludeClient::ensureDataAvailable(DataProvider::Ptr provider,  MemberFunctionPtr slot)
+void InqludeClient::ensureDataAvailable(DataProvider::Ptr provider)
 {
     provider->ensureDataAvailable();
     connect(provider.data(), &DataProvider::error, this, &InqludeClient::error);
-    connect(provider.data(), &DataProvider::dataAvailable, this, slot);
 }
-

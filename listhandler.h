@@ -18,22 +18,26 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#ifndef CommandHandler_H
-#define CommandHandler_H
+#ifndef ListHandler_H
+#define ListHandler_H
+
+#include "abstracthandler.h"
 
 class QTextStream;
 class QJsonDocument;
 
-class CommandHandler
+class ListHandler : public AbstractHandler
 {
+    Q_OBJECT
 public:
-    CommandHandler(QTextStream& stream);
-    ~CommandHandler() {}
+    ListHandler(QTextStream& stream);
+    ~ListHandler() {}
 
+public Q_SLOTS:
     void list(const QJsonDocument &doc);
 
 private:
     QTextStream& m_stream;
 };
 
-#endif // CommandHandler_H
+#endif

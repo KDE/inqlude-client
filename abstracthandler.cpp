@@ -18,28 +18,21 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#ifndef InqludeClient_H
-#define InqludeClient_H
+#include "abstracthandler.h"
+#include <QCoreApplication>
 
-#include "dataprovider.h"
-#include <QtCore/QObject>
-
-class InqludeClient : public QObject
+AbstractHandler::AbstractHandler()
+    : m_quitOnCompletion(false)
 {
-    Q_OBJECT
+}
 
-public:
-    InqludeClient();
-    virtual ~InqludeClient();
+void AbstractHandler::setQuitOnCompletion(bool b)
+{
+    m_quitOnCompletion = b;
+}
 
-    int run();
-
-private Q_SLOTS:
-    void error();
-
-private:
-    void ensureDataAvailable(DataProvider::Ptr provider);
-
-};
-
-#endif // InqludeClient_H
+void AbstractHandler::handlingCompleted()
+{
+    if (m_quitOnCompletion)
+        qApp->quit();
+}

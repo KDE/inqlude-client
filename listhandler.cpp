@@ -18,19 +18,20 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#include "commandhandler.h"
+#include "listhandler.h"
 
+#include <QCoreApplication>
 #include <QTextStream>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
-CommandHandler::CommandHandler(QTextStream &stream)
+ListHandler::ListHandler(QTextStream &stream)
     : m_stream(stream)
 {
 }
 
-void CommandHandler::list(const QJsonDocument &doc)
+void ListHandler::list(const QJsonDocument &doc)
 {
     const QJsonArray libs = doc.array();
     int longestName = 0;
@@ -45,4 +46,6 @@ void CommandHandler::list(const QJsonDocument &doc)
         const QString summary = details.value("summary").toString();
         m_stream << qPrintable(name.leftJustified(longestName + 1)) << qPrintable(summary) << '\n';
     }
+    m_stream.flush();
+    handlingCompleted();
 }

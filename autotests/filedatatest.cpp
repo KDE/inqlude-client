@@ -7,7 +7,7 @@
 #include <QSignalSpy>
 
 #include "filedataprovider.h"
-#include "commandhandler.h"
+#include "listhandler.h"
 
 class TestFileData : public QObject
 {
@@ -47,7 +47,7 @@ void TestFileData::listCommandShouldOutputList()
 
     QString output;
     QTextStream stream(&output);
-    CommandHandler handler(stream);
+    ListHandler handler(stream);
     handler.list(doc);
     const QStringList expected = QStringList()
        << "karchive   Reading, creating, and manipulating file archives"

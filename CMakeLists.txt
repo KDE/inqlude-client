@@ -13,6 +13,7 @@ set(inqludeclient_SRCS
    dataprovider.cpp
    filedataprovider.cpp
    httpdataprovider.cpp
+   commandhandler.cpp
    main.cpp)
 
 add_executable(inqlude-client ${inqludeclient_SRCS})

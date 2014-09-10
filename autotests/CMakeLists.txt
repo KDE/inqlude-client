@@ -5,6 +5,7 @@ add_executable(filedatatest
     ../dataprovider.cpp
     ../filedataprovider.cpp
     ../httpdataprovider.cpp
+    ../commandhandler.cpp
 )
 target_link_libraries(filedatatest
     Qt5::Core

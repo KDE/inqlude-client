@@ -20,10 +20,9 @@
 
 #include "inqludeclient.h"
 #include "dataprovider.h"
+#include "commandhandler.h"
+
 #include <QCommandLineParser>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QDebug>
 
 #include <iostream>
@@ -67,13 +66,9 @@ int InqludeClient::run()
 
 void InqludeClient::list(const QJsonDocument &doc)
 {
-    const QJsonArray libs = doc.array();
-    for (int i = 0; i < libs.count(); ++i) {
-        const QJsonObject details = libs.at(i).toObject();
-        const QString name = details.value("name").toString();
-        const QString summary = details.value("summary").toString();
-        std::cout << qPrintable(name) << '\t' << qPrintable(summary) << '\n';
-    }
+    QTextStream stream(stdout);
+    CommandHandler handler(stream);
+    handler.list(doc);
     qApp->quit();
 }
 

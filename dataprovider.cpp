@@ -20,8 +20,27 @@
 
 #include "dataprovider.h"
 #include "filedataprovider.h"
+#include "httpdataprovider.h"
+
+#include <QStandardPaths>
+#include <QDateTime>
+#include <QFileInfo>
 
 DataProvider::Ptr DataProvider::createProvider()
 {
-    return Ptr(); // DataProvider::Ptr(new HttpDataProvider);
+    // Check cache
+    const QString cache = cacheFile();
+    QFileInfo info(cache);
+    if (info.exists() && info.lastModified().daysTo(QDateTime::currentDateTime()) < 1) {
+        // Exists and is recent, use that
+        return Ptr(new FileDataProvider(cacheFile()));
+    }
+
+    // Download file
+    return Ptr(new HttpDataProvider(cacheFile()));
+}
+
+QString DataProvider::cacheFile()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/inqlude-all.json";
 }

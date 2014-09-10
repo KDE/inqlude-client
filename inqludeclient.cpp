@@ -61,6 +61,7 @@ int InqludeClient::run()
         return qApp->exec();
     }
 
+    parser.showHelp();
     return 1;
 }
 

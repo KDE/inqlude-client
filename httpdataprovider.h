@@ -18,30 +18,29 @@
  *  Boston, MA 02110-1301, USA.
  */
 
-#ifndef DataProvider_H
-#define DataProvider_H
+#ifndef HttpDataProvider_H
+#define HttpDataProvider_H
 
-#include <QSharedPointer>
+#include "dataprovider.h"
 
-class DataProvider : public QObject
+class QNetworkAccessManager;
+class QNetworkReply;
+
+class HttpDataProvider : public DataProvider
 {
     Q_OBJECT
 public:
-    typedef QSharedPointer<DataProvider> Ptr;
-    virtual ~DataProvider() {}
+    HttpDataProvider(const QString &cacheFile);
+    virtual ~HttpDataProvider();
 
-    virtual void ensureDataAvailable() = 0;
+    virtual void ensureDataAvailable() Q_DECL_OVERRIDE;
 
-    static Ptr createProvider();
+private Q_SLOTS:
+    void slotFinished(QNetworkReply *reply);
 
-    static QString cacheFile();
-
-Q_SIGNALS:
-    void error();
-    void dataAvailable(const QJsonDocument &doc);
-
-protected:
-    DataProvider() {}
+private:
+    QNetworkAccessManager *m_qnam;
+    QString m_cacheFile;
 };
 
-#endif // DataProvider_H
+#endif

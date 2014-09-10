@@ -17,6 +17,7 @@ class TestFileData : public QObject
 private Q_SLOTS:
     void fileDataProviderShouldProvideData();
     void listCommandShouldOutputList();
+    void invalidDownloadCommandShouldError();
     void downloadCommandShouldStartDownload();
 
 private:
@@ -57,6 +58,19 @@ void TestFileData::listCommandShouldOutputList()
        << "kbookmarks Web browser bookmark management"
        << "";
     QCOMPARE(output.split('\n'), expected);
+}
+
+void TestFileData::invalidDownloadCommandShouldError()
+{
+    QJsonDocument doc;
+    fetchData(&doc);
+
+    QString output;
+    QTextStream stream(&output);
+    DownloadHandler handler(stream, "doesnotexist");
+    handler.download(doc);
+    const QString expected("Library doesnotexist not found\n");
+    QCOMPARE(output, expected);
 }
 
 void TestFileData::downloadCommandShouldStartDownload()

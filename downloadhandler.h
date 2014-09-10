@@ -25,25 +25,33 @@
 
 class QTextStream;
 class QJsonDocument;
+class QNetworkReply;
 class QUrl;
+class QFile;
 
 class DownloadHandler : public AbstractHandler
 {
     Q_OBJECT
 public:
-    DownloadHandler(QTextStream &stream, const QString &library);
-    ~DownloadHandler() {}
+    DownloadHandler(QTextStream &errorStream, const QString &library);
+    ~DownloadHandler();
 
 
 public Q_SLOTS:
     void download(const QJsonDocument &doc);
 
 protected:
-    virtual void startDownload(const QUrl &sourceUrl);
+    virtual void startDownload(const QUrl &sourceUrl); // reimplemented by the unittest
+
+private Q_SLOTS:
+    void slotReadyRead();
+    void slotFinished(QNetworkReply *reply);
 
 private:
-    QTextStream& m_stream;
+    QTextStream& m_errorStream;
     QString m_library;
+    QNetworkReply *m_reply;
+    QFile *m_destFile;
 };
 
 #endif

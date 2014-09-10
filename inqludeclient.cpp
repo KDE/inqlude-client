@@ -53,12 +53,12 @@ int InqludeClient::run()
 
     parser.process(*qApp);
 
-    QTextStream stream(stdout);
 
     const QStringList args = parser.positionalArguments();
     const QString command = args.isEmpty() ? QString() : args.first();
     if (command == QLatin1String("list")) {
-        ListHandler handler(stream);
+        QTextStream outStream(stdout);
+        ListHandler handler(outStream);
         handler.setQuitOnCompletion(true);
         connect(provider.data(), &DataProvider::dataAvailable, &handler, &ListHandler::list);
         ensureDataAvailable(provider);
@@ -68,7 +68,8 @@ int InqludeClient::run()
             parser.showHelp(1);
         }
         const QString library = args.at(1);
-        DownloadHandler handler(stream, library);
+        QTextStream errorStream(stdout);
+        DownloadHandler handler(errorStream, library);
         handler.setQuitOnCompletion(true);
         connect(provider.data(), &DataProvider::dataAvailable, &handler, &DownloadHandler::download);
         ensureDataAvailable(provider);

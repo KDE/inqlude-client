@@ -22,18 +22,30 @@
 
 #include <QCoreApplication>
 #include <QUrl>
+#include <QFile>
 #include <QTextStream>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
-DownloadHandler::DownloadHandler(QTextStream &stream, const QString &library)
-    : m_stream(stream), m_library(library)
+DownloadHandler::DownloadHandler(QTextStream &errorStream, const QString &library)
+    : m_errorStream(errorStream), m_library(library), m_reply(Q_NULLPTR), m_destFile(Q_NULLPTR)
 {
+}
+
+DownloadHandler::~DownloadHandler()
+{
+    m_errorStream.flush();
+    delete m_destFile;
+    delete m_reply;
 }
 
 void DownloadHandler::download(const QJsonDocument &doc)
 {
+    bool libraryFound = false;
     const QJsonArray libs = doc.array();
     for (int i = 0; i < libs.count(); ++i) {
         const QJsonObject details = libs.at(i).toObject();
@@ -42,15 +54,42 @@ void DownloadHandler::download(const QJsonDocument &doc)
             const QJsonObject packages = details.value("packages").toObject();
             const QString source = packages.value("source").toString();
             const QUrl sourceUrl(source);
-            m_stream << "Downloading " << sourceUrl.toDisplayString() << "..." << '\n';
+            m_errorStream << "Downloading " << sourceUrl.toDisplayString() << "...\n";
             startDownload(sourceUrl);
+            libraryFound = true;
         }
     }
-    m_stream.flush();
-    handlingCompleted();
+    if (!libraryFound) {
+        m_errorStream << "Library " << m_library << " not found\n";
+        handlingCompleted();
+    }
 }
 
 void DownloadHandler::startDownload(const QUrl &sourceUrl)
 {
+    m_destFile = new QFile(sourceUrl.fileName());
+    if (!m_destFile->open(QIODevice::WriteOnly)) {
+        m_errorStream << "Cannot write to " << m_destFile->fileName() << "\n";
+        handlingCompleted();
+        return;
+    }
+    QNetworkAccessManager *qnam = new QNetworkAccessManager(this);
+    QNetworkRequest request(sourceUrl);
+    m_reply = qnam->get(request);
+    connect(m_reply, &QNetworkReply::readyRead, this, &DownloadHandler::slotReadyRead);
+    connect(qnam, &QNetworkAccessManager::finished, this, &DownloadHandler::slotFinished);
+}
 
+void DownloadHandler::slotReadyRead()
+{
+    m_destFile->write(m_reply->readAll());
+}
+
+void DownloadHandler::slotFinished(QNetworkReply* reply)
+{
+    if (reply->error() != QNetworkReply::NoError) {
+        m_errorStream << reply->errorString() << '\n';
+    }
+    m_destFile->close();
+    handlingCompleted();
 }

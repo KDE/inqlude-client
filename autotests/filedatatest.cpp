@@ -18,6 +18,7 @@ private Q_SLOTS:
     void fileDataProviderShouldProvideData();
     void listCommandShouldOutputList();
     void invalidDownloadCommandShouldError();
+    void downloadCommandWithNoSourceShouldError();
     void downloadCommandShouldStartDownload();
 
 private:
@@ -70,6 +71,19 @@ void TestFileData::invalidDownloadCommandShouldError()
     DownloadHandler handler(stream, "doesnotexist");
     handler.download(doc);
     const QString expected("Library doesnotexist not found\n");
+    QCOMPARE(output, expected);
+}
+
+void TestFileData::downloadCommandWithNoSourceShouldError()
+{
+    QJsonDocument doc;
+    fetchData(&doc);
+
+    QString output;
+    QTextStream stream(&output);
+    DownloadHandler handler(stream, "kbookmarks");
+    handler.download(doc);
+    const QString expected("Library kbookmarks is missing information about a source package\n");
     QCOMPARE(output, expected);
 }
 

@@ -45,7 +45,6 @@ DownloadHandler::~DownloadHandler()
 
 void DownloadHandler::download(const QJsonDocument &doc)
 {
-    bool libraryFound = false;
     const QJsonArray libs = doc.array();
     for (int i = 0; i < libs.count(); ++i) {
         const QJsonObject details = libs.at(i).toObject();
@@ -53,16 +52,19 @@ void DownloadHandler::download(const QJsonDocument &doc)
         if (name == m_library) {
             const QJsonObject packages = details.value("packages").toObject();
             const QString source = packages.value("source").toString();
-            const QUrl sourceUrl(source);
-            m_errorStream << "Downloading " << sourceUrl.toDisplayString() << "...\n";
-            startDownload(sourceUrl);
-            libraryFound = true;
+            if (source.isEmpty()) {
+                m_errorStream << "Library " << m_library << " is missing information about a source package\n";
+                handlingCompleted();
+            } else {
+                const QUrl sourceUrl(source);
+                m_errorStream << "Downloading " << sourceUrl.toDisplayString() << "...\n";
+                startDownload(sourceUrl);
+            }
+            return;
         }
     }
-    if (!libraryFound) {
-        m_errorStream << "Library " << m_library << " not found\n";
-        handlingCompleted();
-    }
+    m_errorStream << "Library " << m_library << " not found\n";
+    handlingCompleted();
 }
 
 void DownloadHandler::startDownload(const QUrl &sourceUrl)

@@ -81,9 +81,6 @@
     "platforms": [
       "Linux"
     ],
-    "packages": {
-      "source": "http://download.kde.org/stable/frameworks/5.1.0/kbookmarks-5.1.0.tar.xz"
-    },
     "group": "kde-frameworks"
   }
 ]

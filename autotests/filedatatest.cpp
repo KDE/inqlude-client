@@ -83,7 +83,7 @@ void TestFileData::downloadCommandWithNoSourceShouldError()
     QTextStream stream(&output);
     DownloadHandler handler(stream, "kbookmarks");
     handler.download(doc);
-    const QString expected("Library kbookmarks is missing information about a source package\n");
+    const QString expected("Library kbookmarks has no source package\nSuggestion: see https://projects.kde.org/projects/frameworks/kbookmarks/repository for access to the sources\n");
     QCOMPARE(output, expected);
 }
 

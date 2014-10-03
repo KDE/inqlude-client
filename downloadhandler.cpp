@@ -53,7 +53,12 @@ void DownloadHandler::download(const QJsonDocument &doc)
             const QJsonObject packages = details.value("packages").toObject();
             const QString source = packages.value("source").toString();
             if (source.isEmpty()) {
-                m_errorStream << "Library " << m_library << " is missing information about a source package\n";
+                m_errorStream << "Library " << m_library << " has no source package\n";
+                const QJsonObject urls = details.value("urls").toObject();
+                const QString vcs = urls.value("vcs").toString();
+                if (!vcs.isEmpty()) {
+                    m_errorStream << "Suggestion: see " << vcs << " for access to the sources\n";
+                }
                 handlingCompleted();
             } else {
                 const QUrl sourceUrl(source);

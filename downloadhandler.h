@@ -22,11 +22,12 @@
 #define DownloadHandler_H
 
 #include "abstracthandler.h"
+#include <QUrl>
 
 class QTextStream;
 class QJsonDocument;
 class QNetworkReply;
-class QUrl;
+class QNetworkAccessManager;
 class QFile;
 
 class DownloadHandler : public AbstractHandler
@@ -52,6 +53,8 @@ private:
     QString m_library;
     QNetworkReply *m_reply;
     QFile *m_destFile;
+    QUrl m_urlRedirect;
+    QNetworkAccessManager *m_qnam;
 };
 
 #endif

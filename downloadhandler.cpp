@@ -73,16 +73,18 @@ void DownloadHandler::startDownload(const QUrl &sourceUrl)
         handlingCompleted();
         return;
     }
-    QNetworkAccessManager *qnam = new QNetworkAccessManager(this);
+    m_qnam = new QNetworkAccessManager(this);
     QNetworkRequest request(sourceUrl);
-    m_reply = qnam->get(request);
+    m_reply = m_qnam->get(request);
     connect(m_reply, &QNetworkReply::readyRead, this, &DownloadHandler::slotReadyRead);
-    connect(qnam, &QNetworkAccessManager::finished, this, &DownloadHandler::slotFinished);
+    connect(m_qnam, &QNetworkAccessManager::finished, this, &DownloadHandler::slotFinished);
 }
 
 void DownloadHandler::slotReadyRead()
 {
-    m_destFile->write(m_reply->readAll());
+    if (m_reply->attribute(QNetworkRequest::RedirectionTargetAttribute).isNull()) {
+        m_destFile->write(m_reply->readAll());
+    }
 }
 
 void DownloadHandler::slotFinished(QNetworkReply* reply)
@@ -90,6 +92,18 @@ void DownloadHandler::slotFinished(QNetworkReply* reply)
     if (reply->error() != QNetworkReply::NoError) {
         m_errorStream << reply->errorString() << '\n';
     }
-    m_destFile->close();
-    handlingCompleted();
+
+    // Handle redirections
+    const QUrl possibleRedirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+    if (!possibleRedirectUrl.isEmpty() && possibleRedirectUrl != m_urlRedirect) {
+        m_urlRedirect = possibleRedirectUrl;
+        m_errorStream << "Redirected to " << m_urlRedirect.toDisplayString() << "...\n";
+        reply->deleteLater();
+        m_reply = m_qnam->get(QNetworkRequest(m_urlRedirect));
+        connect(m_reply, &QNetworkReply::readyRead, this, &DownloadHandler::slotReadyRead);
+    } else {
+        m_urlRedirect.clear();
+        m_destFile->close();
+        handlingCompleted();
+    }
 }

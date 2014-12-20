@@ -23,6 +23,7 @@
 #include "downloadhandler.h"
 #include "listhandler.h"
 
+#include <QJsonDocument>
 #include <QCommandLineParser>
 #include <QDebug>
 

@@ -41,8 +41,9 @@ HttpDataProvider::~HttpDataProvider()
 void HttpDataProvider::ensureDataAvailable()
 {
     std::cerr << "Downloading library information, please wait..." << std::endl;
-    QUrl url("http://inqlude.org/inqlude-all.json");
+    QUrl url("https://inqlude.org/inqlude-all.json");
     QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     QNetworkReply* reply = m_qnam->get(request);
     connect(m_qnam, &QNetworkAccessManager::finished, this, &HttpDataProvider::slotFinished);
 }

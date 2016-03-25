@@ -56,9 +56,10 @@ void HttpDataProvider::slotFinished(QNetworkReply *reply)
         emit error();
         return;
     }
-    const QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonParseError jsonError;
+    const QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (doc.isNull()) {
-        qWarning() << "Error parsing JSON document";
+        qWarning() << "Error parsing JSON document:" << jsonError.errorString() << "at offset" << jsonError.offset;
         emit error();
         return;
     }

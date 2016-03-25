@@ -51,8 +51,14 @@ void HttpDataProvider::slotFinished(QNetworkReply *reply)
 {
     const QByteArray data = reply->readAll(); // QJsonDocument can't read from a QIODevice !
     reply->deleteLater();
+    if (data.isEmpty()) {
+        qWarning() << "Empty document downloaded";
+        emit error();
+        return;
+    }
     const QJsonDocument doc = QJsonDocument::fromJson(data);
     if (doc.isNull()) {
+        qWarning() << "Error parsing JSON document";
         emit error();
         return;
     }

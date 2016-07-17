@@ -103,15 +103,15 @@ void DownloadHandler::slotFinished(QNetworkReply* reply)
     // Handle redirections
     const QUrl possibleRedirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     if (!possibleRedirectUrl.isEmpty() && possibleRedirectUrl != m_urlRedirect) {
-        if (possibleRedirectUrl.scheme().startsWith("http")) {
-            m_urlRedirect = possibleRedirectUrl;
+        m_urlRedirect = reply->url().resolved(possibleRedirectUrl);
+        if (m_urlRedirect.scheme().startsWith("http")) {
             m_errorStream << "Redirected to " << m_urlRedirect.toDisplayString() << "...\n";
             reply->deleteLater();
             m_reply = m_qnam->get(QNetworkRequest(m_urlRedirect));
             connect(m_reply, &QNetworkReply::readyRead, this, &DownloadHandler::slotReadyRead);
             return;
         } else {
-            m_errorStream << "Redirection to" << possibleRedirectUrl.toDisplayString() << "forbidden.\n";
+            m_errorStream << "Redirection to" << m_urlRedirect.toDisplayString() << "forbidden.\n";
         }
     }
     m_urlRedirect.clear();
